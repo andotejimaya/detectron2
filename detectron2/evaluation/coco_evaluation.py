@@ -412,6 +412,8 @@ def instances_to_coco_json(instances, img_id):
 
     has_mask = instances.has("pred_masks")
     if has_mask:
+        import pycocotools.mask as pymask
+        import cv2
         # use RLE to encode the masks, because they are too large and takes memory
         # since this evaluator stores outputs of the entire dataset
         rles = [
@@ -419,11 +421,31 @@ def instances_to_coco_json(instances, img_id):
             for mask in instances.pred_masks
         ]
         for rle in rles:
-            # "counts" is an array encoded by mask_util as a byte-stream. Python3's
-            # json writer which always produces strings cannot serialize a bytestream
-            # unless you decode it. Thankfully, utf-8 works out (which is also what
-            # the pycocotools/_mask.pyx does).
+        # "counts" is an array encoded by mask_util as a byte-stream. Python3's
+        # json writer which always produces strings cannot serialize a bytestream
+        # unless you decode it. Thankfully, utf-8 works out (which is also what
+        # the pycocotools/_mask.pyx does).
             rle["counts"] = rle["counts"].decode("utf-8")
+
+        rles = []
+        for mask in instances.pred_masks:
+            img = np.array(mask[:, :, None], order="F", dtype="uint8")
+            #maskedArr = pymask.encode(rle["counts"])
+            #area = float((maskedArr > 0.0).sum())
+            contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS) # CHAIN_APPROX_SIMPLE CHAIN_APPROX_TC89_L1 CHAIN_APPROX_TC89_KCOS
+            segmentation = []
+            valid_poly = 0
+            for contour in contours:
+                if contour.size >= 6:
+                    segmentation.append(contour.astype(float).flatten().tolist())
+                    valid_poly += 1
+
+            if valid_poly == 0:
+                raise ValueError
+
+            #rle["counts"] = segmentation
+            rles.append(segmentation)
+
 
     has_keypoints = instances.has("pred_keypoints")
     if has_keypoints:
