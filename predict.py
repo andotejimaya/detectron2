@@ -22,6 +22,7 @@ def main (imagepath):
     now = datetime.datetime.now().strftime('%Y%m%d%H%M')
     result_dir = "/tmp"
     result_imagepath = os.path.join(result_dir, os.path.basename(imagepath).replace(".jpg",".result.jpg"))
+    result_imagepath2 = result_imagepath.replace(".result.jpg",".result2.jpg")
     result_jsonpath = result_imagepath.replace(".result.jpg",".json")
 
     cfg = get_cfg()
@@ -42,9 +43,23 @@ def main (imagepath):
     metadata = MetadataCatalog.get("madori")
     metadata.thing_classes = ["room"]
 
-    v = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
-    v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-    cv2.imwrite(result_imagepath, v.get_image()[:, :, ::-1])
+    visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
+    out = visualizer.draw_instance_predictions(outputs["instances"].to("cpu"))
+    cv2.imwrite(result_imagepath, out.get_image()[:, :, ::-1])
+
+#    for box in outputs["instances"].pred_boxes.to('cpu'):
+#        visualizer.draw_box(box)
+#        box = (round(box[0]), round(box[1]), round(box[2]) - round(box[0]), round(box[3] - box[1]))
+ #       out = v.draw_text(f"{box[2:4]}", (box[0], box[1]))
+#    for mask in outputs["instances"].pred_masks.cpu().numpy()
+    visualizer = Visualizer(im[:, :, ::-1], metadata=None, scale=1.0)
+    for mask in outputs["instances"].pred_masks.to('cpu'):        
+#        visualizer.draw_binary_mask(mask.numpy(), color=None, edge_color=None, text=None)
+        visualizer.draw_soft_mask(mask.numpy())
+
+    out = visualizer.get_output() 
+
+    cv2.imwrite(result_imagepath2, out.get_image()[:, :, ::-1])
 
     inputs = [{'image_id': 0}]
     livs = LVISEvaluator("madori")
