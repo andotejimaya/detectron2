@@ -428,6 +428,7 @@ def instances_to_coco_json(instances, img_id):
             rle["counts"] = rle["counts"].decode("utf-8")
 
         rles = []
+        approxs = []
         for mask in instances.pred_masks:
             img = np.array(mask[:, :, None], order="F", dtype="uint8")
             #maskedArr = pymask.encode(rle["counts"])
@@ -436,6 +437,10 @@ def instances_to_coco_json(instances, img_id):
             segmentation = []
             valid_poly = 0
             for contour in contours:
+                epsilon = 0.01 * cv2.arcLength(contour, True)
+                approx = cv2.approxPolyDP(contour, epsilon, True)
+                approxs.append(np.ravel(approx).tolist())
+                            
                 if contour.size >= 6:
                     segmentation.append(contour.astype(float).flatten().tolist())
                     valid_poly += 1
@@ -461,6 +466,7 @@ def instances_to_coco_json(instances, img_id):
         }
         if has_mask:
             result["segmentation"] = rles[k]
+            result["approx"] = approxs[k]
         if has_keypoints:
             # In COCO annotations,
             # keypoints coordinates are pixel indices.
