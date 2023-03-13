@@ -436,15 +436,17 @@ def instances_to_coco_json(instances, img_id):
             contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS) # CHAIN_APPROX_SIMPLE CHAIN_APPROX_TC89_L1 CHAIN_APPROX_TC89_KCOS
             segmentation = []
             valid_poly = 0
+            approx1 = []
             for contour in contours:
                 epsilon = 0.01 * cv2.arcLength(contour, True)
                 approx = cv2.approxPolyDP(contour, epsilon, True)
-                approxs.append(np.ravel(approx).tolist())
-                            
+                approx1.extend(np.ravel(approx).tolist())
+
                 if contour.size >= 6:
                     segmentation.append(contour.astype(float).flatten().tolist())
                     valid_poly += 1
 
+            approxs.append(approx1)
             if valid_poly == 0:
                 raise ValueError
 
