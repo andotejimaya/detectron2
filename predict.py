@@ -47,18 +47,12 @@ def main (imagepath):
     out = visualizer.draw_instance_predictions(outputs["instances"].to("cpu"))
     cv2.imwrite(result_imagepath, out.get_image()[:, :, ::-1])
 
-#    for box in outputs["instances"].pred_boxes.to('cpu'):
-#        visualizer.draw_box(box)
-#        box = (round(box[0]), round(box[1]), round(box[2]) - round(box[0]), round(box[3] - box[1]))
- #       out = v.draw_text(f"{box[2:4]}", (box[0], box[1]))
-#    for mask in outputs["instances"].pred_masks.cpu().numpy()
     visualizer = Visualizer(im[:, :, ::-1], metadata=None, scale=1.0)
-    for mask in outputs["instances"].pred_masks.to('cpu'):        
-#        visualizer.draw_binary_mask(mask.numpy(), color=None, edge_color=None, text=None)
+    for mask in outputs["instances"].pred_masks.to('cpu'):
+#        visualizer.draw_binary_mask(mask.numpy()) #, color=None, edge_color=None, text=None)
         visualizer.draw_soft_mask(mask.numpy())
 
-    out = visualizer.get_output() 
-
+    out = visualizer.get_output()
     cv2.imwrite(result_imagepath2, out.get_image()[:, :, ::-1])
 
     inputs = [{'image_id': 0}]
@@ -73,7 +67,7 @@ def main (imagepath):
     with open(result_jsonpath, mode="w") as f:
         f.write(json.dumps(livs._predictions))
 
-    return result_jsonpath, result_imagepath
+    return result_jsonpath, result_imagepath, result_imagepath2
 
 def get_args_parser():
     parser = argparse.ArgumentParser()
@@ -84,4 +78,3 @@ if __name__ == '__main__':
     parser = get_args_parser()
     args, _ = parser.parse_known_args()
     main(args.imagepath)
-
