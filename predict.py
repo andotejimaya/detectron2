@@ -18,6 +18,14 @@ import datetime
 def main (imagepath):
 
     basepath = os.path.dirname(__file__)
+    jsonpath = os.path.join(basepath, "../data/dataset/annotations/annotations.json")
+    imagepath = os.path.join(basepath, "../data/dataset/train/")
+
+    with open(jsonpath, 'r') as f:
+        anno = json.load(f)
+
+    classes = len(anno['categories'])
+    thing_classes = [k['name'] for k in anno['categories']]
 
     now = datetime.datetime.now().strftime('%Y%m%d%H%M')
     result_dir = "/tmp"
@@ -27,7 +35,7 @@ def main (imagepath):
 
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1 #
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = classes #
     cfg.MODEL.WEIGHTS = os.path.join(basepath, cfg.OUTPUT_DIR, "model_final.pth")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4 # ?
     cfg.MODEL.DEVICE = "cpu" # ?
@@ -39,9 +47,9 @@ def main (imagepath):
     outputs = predictor(im)
     instances = outputs['instances'].to("cpu")
 
-    register_coco_instances("madori", {}, os.path.join(basepath, "../data/dataset/annotations/annotations.json"), os.path.join(basepath,"../data/dataset/train/"))
+    register_coco_instances("madori", {}, jsonpath, imagepath)
     metadata = MetadataCatalog.get("madori")
-    metadata.thing_classes = ["room"]
+    metadata.thing_classes = thing_classes
 
     visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
     out = visualizer.draw_instance_predictions(outputs["instances"].to("cpu"))
