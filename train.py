@@ -12,16 +12,14 @@ import json
 
 basepath = os.path.dirname(__file__)
 
-json_path = "../data/dataset/annotations/annotations.json"
-image_path = "../data/dataset/train"
+jsonpath = os.path.join(basepath, "../data/dataset/annotations/annotations.json")
+imagepath = os.path.join(basepath, "../data/dataset/train")
+register_coco_instances("madori", {}, jsonpath, imagepath)
 
-with open(json_path, 'r') as f:
+with open(jsonpath, 'r') as f:
     anno = json.load(f)
 
 classes = len(anno['categories'])
-
-
-register_coco_instances("madori", {}, json_path, image_path)
 
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
