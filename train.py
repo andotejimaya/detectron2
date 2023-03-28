@@ -13,8 +13,8 @@ import json
 basepath = os.path.dirname(__file__)
 
 jsonpath = os.path.join(basepath, "../data/dataset/annotations/annotations.json")
-imagepath = os.path.join(basepath, "../data/dataset/train")
-register_coco_instances("madori", {}, jsonpath, imagepath)
+trainpath = os.path.join(basepath, "../data/dataset/train")
+register_coco_instances("madori", {}, jsonpath, trainpath)
 
 with open(jsonpath, 'r') as f:
     anno = json.load(f)

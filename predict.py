@@ -19,7 +19,7 @@ def main (imagepath):
 
     basepath = os.path.dirname(__file__)
     jsonpath = os.path.join(basepath, "../data/dataset/annotations/annotations.json")
-    imagepath = os.path.join(basepath, "../data/dataset/train/")
+    trainpath = os.path.join(basepath, "../data/dataset/train/")
 
     with open(jsonpath, 'r') as f:
         anno = json.load(f)
@@ -47,7 +47,7 @@ def main (imagepath):
     outputs = predictor(im)
     instances = outputs['instances'].to("cpu")
 
-    register_coco_instances("madori", {}, jsonpath, imagepath)
+    register_coco_instances("madori", {}, jsonpath, trainpath)
     metadata = MetadataCatalog.get("madori")
     metadata.thing_classes = thing_classes
 
