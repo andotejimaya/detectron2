@@ -35,10 +35,10 @@ def main (imagepath):
 
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = classes #
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = classes
     cfg.MODEL.WEIGHTS = os.path.join(basepath, cfg.OUTPUT_DIR, "model_final.pth")
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4 # ?
-    cfg.MODEL.DEVICE = "cpu" # ?
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4
+#    cfg.MODEL.DEVICE = "cpu" # ?
 
     predictor = DefaultPredictor(cfg)
 
